@@ -11,6 +11,7 @@
 
 // Include Files
 #include <stdio.h>
+#include <time.h>
 #include "cmpsc311_util.h"
 
 // Defines
@@ -38,9 +39,9 @@ int print_card( int card ) {
     char *card_suits[] = { SPADE, CLUB, HEART, DIAMOND };
     int suit = card / 13, cardty = card % 13;
     if ( cardty == 8 ) {
-        printf( "10%s", card_suits[suit] );
+        printf( "10%s", card_suits[suit]);
     } else {
-        printf( "%c%s", card_faces[cardty], card_suits[suit] );
+        printf( "%c%s", card_faces[cardty], card_suits[suit]);
     }
 
     // Return zero
@@ -56,9 +57,24 @@ int print_card( int card ) {
 //                num_cards - the number of cards to print
 // Outputs      : 0 always
 
-/*int print_cards( ???? ) {
+int print_cards( int cards_deck[], int num_cards ) {
+  int cnt = 0;
+
+  for (int i = 0; i < num_cards; i++) {
+    cnt++;
+    print_card( cards_deck[i]);
+    printf("%s", " ");
+    if (cnt == 13)
+    {
+      printf("%s\n", "");
+      cnt = 0;
+    }
+  }
+
+  printf("%s\n", "");
+
   return (0);
-}*/
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -70,6 +86,22 @@ int print_card( int card ) {
 // Outputs      : 0 always
 
 int shuffle_cards( int cards[], int num_cards ) {
+  int rand_index = 0;
+  int i = 0;
+  int temp = 0;
+
+  while (i < num_cards-2)
+  {
+    //rand_index = i + rand() % (num_cards - i + 1);
+    rand_index = getRandomValue( i, num_cards-1);
+
+    temp = cards[i];
+    cards[i] = cards[rand_index];
+    cards[rand_index] = temp;
+
+    i++;
+  }
+
   return (0);
 }
 
@@ -167,19 +199,29 @@ int show_player_money_histogram( float money_rounds[], int last_round ) {
 int main( int argc, char **argv ) {
 
     /* Local variables */
-    //int cmp311_deck[NUM_CARDS];  // This is the deck of cards
+    int cmp311_deck[NUM_CARDS];  // This is the deck of cards
 
-    /* Preamble information */
+    /* Preamble information srand(time(NULL)) ;*/
     printf( "CMPSC311 - Assignment #1 - Fall 2020\n\n" );
-    //srand(time(NULL)) ;
+    srand(time(NULL));
 
     /* Step #1 - create the deck of cards */
 
+    for (int i = 0; i < NUM_CARDS; i++) {
+      cmp311_deck[i] = i;
+    }
+
     /* Step #2 - print the deck of cards */
+
+    print_cards(cmp311_deck, NUM_CARDS);
 
     /* Step #4 - shuffle the deck */
 
+    shuffle_cards(cmp311_deck, NUM_CARDS);
+
     /* Step #5 - print the shuffled deck of cards */
+
+    print_cards(cmp311_deck, NUM_CARDS);
 
     /* Step #6 - sort the cards */
 
