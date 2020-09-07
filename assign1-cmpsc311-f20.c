@@ -128,6 +128,22 @@ int hand_value( int cards[], int num_cards ) {
 // Outputs      : 0 always
 
 int sort_cards( int hand[], int num_cards ) {
+  int flag = 0;
+  int temp = 0;
+
+  do {
+    flag = 1;
+    for (int i = 0; i < num_cards-1; i++) {
+      if (hand[i] > hand[i+1])
+      {
+        temp = hand[i];
+        hand[i] = hand[i+1];
+        hand[i+1] = temp;
+        flag = 0;
+      }
+    }
+  } while(flag != 1);
+
   return (0);
 }
 
@@ -225,7 +241,11 @@ int main( int argc, char **argv ) {
 
     /* Step #6 - sort the cards */
 
+    sort_cards(cmp311_deck, NUM_CARDS);
+
     /* Step #7 - print the sorted deck of cards */
+
+    print_cards(cmp311_deck, NUM_CARDS);
 
     /* Step #9 - deal the hands */
 
