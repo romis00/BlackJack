@@ -207,6 +207,22 @@ int sort_cards( int hand[], int num_cards ) {
 // Outputs      : 0 = stand, 1 = hit
 
 int dealer_play( int hand[], int num_cards ) {
+
+  int sum = hand_value(hand, num_cards);
+
+  if (((sum >= 16) && (sum <= 21)) || (num_cards >= MAX_CARDS))
+  {
+    return 0;
+  }
+  else if (sum < 16)
+  {
+    return 1;
+  }
+  else
+  {
+    return 2; //Signals that player has over 21
+  }
+
   return (0);
 }
 
@@ -251,10 +267,12 @@ int player_play( int hand[], int num_cards, int dealer_card )
 int play_hand( int deck[], int num_cards, float *player_money ) {
   int dealer_cards[MAX_CARDS];
   int player_cards[MAX_CARDS];
+  int final_hand_dealer = 0;               //The final hand value the guy stands with
+  int final_hand_player = 0;               //The final hand value the guy stands with
   int number_player_cards = 2;             //Always at least two cards to start
-  //int number_dealer_cards = 2;             //Always at least two cards to start
+  int number_dealer_cards = 2;             //Always at least two cards to start
   int i = 4;                               //index of deck exclusive first 4 played cards
-  int player_play_response = 0;
+  int player_play_response = 0;            //Strategy response to hit/stand
 
   printf("%s\n", "---- New hand -----");
 
@@ -281,17 +299,17 @@ int play_hand( int deck[], int num_cards, float *player_money ) {
   ///////////////////////////////////Player move goes on
   if (hand_value(player_cards, 2) == 21)
   {
-    printf("%s", "Player has Blackjack!, wins $7.50\n");
+    printf("%s", "\nPlayer has Blackjack!, wins $7.50\n");
     *player_money += 7.5;
     return 0;
   }
   else
   {
-    player_play_response = player_play(player_cards, number_player_cards,dealer_cards[0]);
+    player_play_response = player_play(player_cards, number_player_cards, dealer_cards[0]);
 
     while (player_play_response == 1) //Player hits until 17 or more
     {
-      player_cards[i-2] = deck[i];
+      player_cards[number_player_cards] = deck[i];
       number_player_cards++;
       printf("%s%d%s", "\nPlayer hit (", hand_value(player_cards, number_player_cards), "): ");
       print_cards(player_cards, number_player_cards);
@@ -304,6 +322,8 @@ int play_hand( int deck[], int num_cards, float *player_money ) {
     {
       printf("%s%d%s", "\nPlayer stands (", hand_value(player_cards, number_player_cards), "): ");
       print_cards(player_cards, number_player_cards);
+      printf("%s", "\n");
+      final_hand_player = hand_value(player_cards, number_player_cards);
     }
     else if (player_play_response == 2) //Overkill
     {
@@ -312,6 +332,47 @@ int play_hand( int deck[], int num_cards, float *player_money ) {
       return 0;
     }
 
+    ///////////////////////////////////////////////////////////Player move is done
+
+    ///////////////////////////////////////////////////////////Dealer turn to move
+    player_play_response = dealer_play(dealer_cards, number_dealer_cards);
+
+    while (player_play_response == 1) //Player hits until 17 or more
+    {
+      dealer_cards[number_dealer_cards] = deck[i];
+      number_dealer_cards++;
+      printf("%s%d%s", "\nDealer hit (", hand_value(dealer_cards, number_dealer_cards), "): ");
+      print_cards(dealer_cards, number_dealer_cards);
+
+      player_play_response = dealer_play(dealer_cards, number_dealer_cards);
+      i++;
+    }
+
+    if (player_play_response == 0)
+    {
+      printf("%s%d%s", "\nDealer stands (", hand_value(dealer_cards, number_dealer_cards), "): ");
+      print_cards(dealer_cards, number_dealer_cards);
+      final_hand_dealer = hand_value(dealer_cards, number_dealer_cards);
+    }
+    else if (player_play_response == 2) //Overkill
+    {
+      printf("%s", "\nDealer BUSTS ... player wins!\n");
+      *player_money += 5;
+      return 0;
+    }
+    ///////////////////////////////////////////////////////////Dealer move is done
+
+    ///////////////////////////////////////////////////////////Calculating result
+    if (final_hand_dealer >= final_hand_player)
+    {
+      printf("%s", "\n\nDealer wins!!!\n");
+      *player_money -= 5;
+    }
+    else
+    {
+      printf("%s", "\n\nPlayer wins!!!\n");
+      *player_money += 5;
+    }
   }
 
   return 0;
@@ -346,7 +407,9 @@ int main( int argc, char **argv )
     /* Local variables */
     int cmp311_deck[NUM_CARDS];  // This is the deck of cards
     float player_money = 100;
+    float previous_player_money = 100; //To track wether the guy win/lose
     int i = 1;
+    int winning_games = 0;
 
     /* Preamble information srand(time(NULL)) ;*/
     printf( "CMPSC311 - Assignment #1 - Fall 2020\n\n" );
@@ -383,14 +446,27 @@ int main( int argc, char **argv )
 
     /* Step #9 - deal the hands */////
 
-    while ((i<=5) && (player_money>=5))
+    while ((i<=100) && (player_money>=5))
     {
       play_hand(cmp311_deck, NUM_CARDS, &player_money);
-      printf("%s%d%s%0.2f%s", "\nAfter hand ", i, " player has ", player_money, "$ left\n\n");
+      printf("%s%d%s%0.2f%s", "After hand ", i, " player has ", player_money, "$ left\n\n");
+
+      if (player_money-previous_player_money > 0)
+      {
+        winning_games++;
+      }
+      previous_player_money = player_money;
+
       i++;
     }
+    i--;
+
+    printf("%s", "-------------\n");
+    printf("%s%d%s%d%s%d%s", "Blackjack done - player won ", winning_games, " out of ", i, " hands (", winning_games, ".00).");
 
     /* Step 10 show historgrapm */
+
+
 
     /* Exit the program successfully */
     printf( "\n\nCMPSC311 - Assignment #1 - Spring 2020 Complete.\n" );
