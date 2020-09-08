@@ -387,7 +387,70 @@ int play_hand( int deck[], int num_cards, float *player_money ) {
 //                last_round - the hand number where the game stopped
 // Outputs      : 0 always
 
-int show_player_money_histogram( float money_rounds[], int last_round ) {
+int show_player_money_histogram( float money_rounds[], int last_round )
+{
+  int max_money = 0; //The maximum money player ever had so set as top coordinate.
+
+  printf("%s", "\n                                             Player Cash by Round                                             \n");
+  printf("%s", "     ---------------------------------------------------------------------------------------------------- \n");
+
+  for (int i = 0; i < last_round; i++) //Setting maximum value
+  {
+    if (max_money < money_rounds[i])
+    {
+      max_money = money_rounds[i];
+    }
+  }
+
+  for (int i = 200; i >= 0; i-=5)
+  {
+    if (i / 100 > 0)
+    {
+      printf("%d%s", i, " |");
+    } else if (i / 10 > 0)
+    {
+      printf("%s%d%s", " ", i, " |");
+    } else
+    {
+      printf("%s%d%s", "  ", i, " |");
+    }
+
+    for (int j = 1; j <= 100; j++)
+    {
+      if ((i <= money_rounds[j])&&(j<last_round))
+      {
+        printf("%s", "X");
+      }
+      else
+      {
+        printf("%s", ".");
+      }
+    }
+
+    printf("%s", "|\n");
+  }
+
+  ////////////////////////////////////////////////////Editing the end of the table
+
+  printf("%s", "     ---------------------------------------------------------------------------------------------------- \n");
+  printf("%s", "     ");
+  for (int i = 1; i <= 10; i++)
+  {
+    printf("%s%d", "         ", i);
+  }
+  printf("%s", "\n");
+  printf("%s", "     ");
+  for (int i = 1; i <= 10; i++)
+  {
+    for (int i = 1; i < 10; i++)
+    {
+      printf("%d", i);
+    }
+    printf("%d", 0);
+  }
+
+  printf("%s", "\n");
+
   return (0);
 }
 
@@ -406,8 +469,8 @@ int main( int argc, char **argv )
 
     /* Local variables */
     int cmp311_deck[NUM_CARDS];  // This is the deck of cards
+    float money_rounds[101];  //Players money per each round
     float player_money = 100;
-    float previous_player_money = 100; //To track wether the guy win/lose
     int i = 1;
     int winning_games = 0;
 
@@ -445,28 +508,28 @@ int main( int argc, char **argv )
     printf("%s\n", "");
 
     /* Step #9 - deal the hands */////
+    money_rounds[0] = player_money;
 
     while ((i<=100) && (player_money>=5))
     {
       play_hand(cmp311_deck, NUM_CARDS, &player_money);
       printf("%s%d%s%0.2f%s", "After hand ", i, " player has ", player_money, "$ left\n\n");
 
-      if (player_money-previous_player_money > 0)
+      if (player_money-money_rounds[i-1] > 0)
       {
         winning_games++;
       }
-      previous_player_money = player_money;
+      money_rounds[i] = player_money;
 
       i++;
     }
-    i--;
 
     printf("%s", "-------------\n");
-    printf("%s%d%s%d%s%d%s", "Blackjack done - player won ", winning_games, " out of ", i, " hands (", winning_games, ".00).");
+    printf("%s%d%s%d%s%d%s", "Blackjack done - player won ", winning_games, " out of ", i, " hands (", winning_games, ".00).\n");
 
     /* Step 10 show historgrapm */
 
-
+    show_player_money_histogram(money_rounds, i);
 
     /* Exit the program successfully */
     printf( "\n\nCMPSC311 - Assignment #1 - Spring 2020 Complete.\n" );
