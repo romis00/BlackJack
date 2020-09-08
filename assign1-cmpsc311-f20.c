@@ -274,7 +274,7 @@ int play_hand( int deck[], int num_cards, float *player_money ) {
   int i = 4;                               //index of deck exclusive first 4 played cards
   int player_play_response = 0;            //Strategy response to hit/stand
 
-  printf("%s\n", "---- New hand -----");
+  printf("%s\n", "---- New hand -----\n");
 
   shuffle_cards(deck, num_cards);
 
@@ -327,7 +327,7 @@ int play_hand( int deck[], int num_cards, float *player_money ) {
     }
     else if (player_play_response == 2) //Overkill
     {
-      printf("%s", "\nPlayer BUSTS ... dealer wins!\n");
+      printf("%s", "\nPlayer BUSTS ... dealer wins!\n\n");
       *player_money -= 5;
       return 0;
     }
@@ -356,7 +356,7 @@ int play_hand( int deck[], int num_cards, float *player_money ) {
     }
     else if (player_play_response == 2) //Overkill
     {
-      printf("%s", "\nDealer BUSTS ... player wins!\n");
+      printf("%s", "\nDealer BUSTS ... player wins!\n\n");
       *player_money += 5;
       return 0;
     }
@@ -365,12 +365,12 @@ int play_hand( int deck[], int num_cards, float *player_money ) {
     ///////////////////////////////////////////////////////////Calculating result
     if (final_hand_dealer >= final_hand_player)
     {
-      printf("%s", "\n\nDealer wins!!!\n");
+      printf("%s", "\n\nDealer wins!!!\n\n");
       *player_money -= 5;
     }
     else
     {
-      printf("%s", "\n\nPlayer wins!!!\n");
+      printf("%s", "\n\nPlayer wins!!!\n\n");
       *player_money += 5;
     }
   }
@@ -513,7 +513,7 @@ int main( int argc, char **argv )
     while ((i<=100) && (player_money>=5))
     {
       play_hand(cmp311_deck, NUM_CARDS, &player_money);
-      printf("%s%d%s%0.2f%s", "After hand ", i, " player has ", player_money, "$ left\n\n");
+      printf("%s%d%s%0.2f%s", "After hand ", i, " player has ", player_money, "$ left\n");
 
       if (player_money-money_rounds[i-1] > 0)
       {
