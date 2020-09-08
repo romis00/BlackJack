@@ -71,7 +71,7 @@ int print_cards( int cards_deck[], int num_cards ) {
     }
   }
 
-  printf("%s\n", "");
+  //printf("%s\n", "");
 
   return (0);
 }
@@ -85,15 +85,16 @@ int print_cards( int cards_deck[], int num_cards ) {
 //                num_cards - the number of cards to print
 // Outputs      : 0 always
 
-int shuffle_cards( int cards[], int num_cards ) {
+int shuffle_cards( int cards[], int num_cards )
+{
   int rand_index = 0;
   int i = 0;
   int temp = 0;
 
-  while (i < num_cards-2)
+  while (i < num_cards - 2)
   {
     //rand_index = i + rand() % (num_cards - i + 1);
-    rand_index = getRandomValue( i, num_cards-1);
+    rand_index = getRandomValue( i, num_cards - 1);
 
     temp = cards[i];
     cards[i] = cards[rand_index];
@@ -114,8 +115,56 @@ int shuffle_cards( int cards[], int num_cards ) {
 //                num_cards - the number of cards in the hand
 // Outputs      : 0 always
 
-int hand_value( int cards[], int num_cards ) {
-  return (0);
+int hand_value( int cards[], int num_cards )
+{
+  int sum = 0;
+  int Aces_flag = 0;
+  int temp = 0;
+
+  for (int i = 0; i < num_cards; i++)
+  {
+    if (cards[i] <= 12)
+    {
+      temp = cards[i];
+    }
+    else if (cards[i] <= 25)
+    {
+      temp = cards[i] - 13;
+    }
+    else if (cards[i] <= 38)
+    {
+      temp = cards[i] - 26;
+    }
+    else
+    {
+      temp = cards[i] - 39;
+    }
+
+    if (temp <=8)
+    {
+      sum = sum + temp + 2;
+    }
+    else if (temp <= 11)
+    {
+      sum = sum + 10;
+    }
+    else
+    {
+      Aces_flag++;
+    }
+  }
+
+  if ((Aces_flag != 0) && (sum != 21))
+  {
+    int Aces__points_to_add = 11; //Available aces point to add 1-11
+    while ((sum != 21) && (Aces__points_to_add > 0))
+    {
+      sum += 1;
+      Aces__points_to_add--;
+    }
+  }
+
+  return sum;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -133,12 +182,12 @@ int sort_cards( int hand[], int num_cards ) {
 
   do {
     flag = 1;
-    for (int i = 0; i < num_cards-1; i++) {
-      if (hand[i] > hand[i+1])
+    for (int i = 0; i < num_cards - 1; i++) {
+      if (hand[i] > hand[i + 1])
       {
         temp = hand[i];
-        hand[i] = hand[i+1];
-        hand[i+1] = temp;
+        hand[i] = hand[i + 1];
+        hand[i + 1] = temp;
         flag = 0;
       }
     }
@@ -171,8 +220,22 @@ int dealer_play( int hand[], int num_cards ) {
 //                dealer_card - the dealers face up card
 // Outputs      : 0 = stand, 1 = hit
 
-int player_play( int hand[], int num_cards, int dealer_card ) {
-  return (0);
+int player_play( int hand[], int num_cards, int dealer_card )
+{
+  int sum = hand_value(hand, num_cards);
+
+  if (((sum >= 16) && (sum <= 21)) || (num_cards >= MAX_CARDS))
+  {
+    return 0;
+  }
+  else if (sum < 16)
+  {
+    return 1;
+  }
+  else
+  {
+    return 2; //Signals that player has over 21
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -186,7 +249,72 @@ int player_play( int hand[], int num_cards, int dealer_card ) {
 // Outputs      : 1 if player wins, 0 if dealer wins
 
 int play_hand( int deck[], int num_cards, float *player_money ) {
-  return (0);
+  int dealer_cards[MAX_CARDS];
+  int player_cards[MAX_CARDS];
+  int number_player_cards = 2;             //Always at least two cards to start
+  //int number_dealer_cards = 2;             //Always at least two cards to start
+  int i = 4;                               //index of deck exclusive first 4 played cards
+  int player_play_response = 0;
+
+  printf("%s\n", "---- New hand -----");
+
+  shuffle_cards(deck, num_cards);
+
+  //////////////////////////First cards being handed out
+
+  dealer_cards[0] = deck[0];
+  dealer_cards[1] = deck[1];
+  player_cards[0] = deck[2];
+  player_cards[1] = deck[3];
+
+  printf("%s", "Dealer cards: ");
+  print_card(dealer_cards[0]);
+  printf("%s", "  XX\n\n");
+
+  printf("%s", "Player cards: ");
+  print_card(player_cards[0]);
+  printf("%s", "  ");
+  print_card(player_cards[1]);
+
+  //////////////////////////////////////////////////////
+
+  ///////////////////////////////////Player move goes on
+  if (hand_value(player_cards, 2) == 21)
+  {
+    printf("%s", "Player has Blackjack!, wins $7.50\n");
+    *player_money += 7.5;
+    return 0;
+  }
+  else
+  {
+    player_play_response = player_play(player_cards, number_player_cards,dealer_cards[0]);
+
+    while (player_play_response == 1) //Player hits until 17 or more
+    {
+      player_cards[i-2] = deck[i];
+      number_player_cards++;
+      printf("%s%d%s", "\nPlayer hit (", hand_value(player_cards, number_player_cards), "): ");
+      print_cards(player_cards, number_player_cards);
+
+      player_play_response = player_play(player_cards, number_player_cards, dealer_cards[0]);
+      i++;
+    }
+
+    if (player_play_response == 0)
+    {
+      printf("%s%d%s", "\nPlayer stands (", hand_value(player_cards, number_player_cards), "): ");
+      print_cards(player_cards, number_player_cards);
+    }
+    else if (player_play_response == 2) //Overkill
+    {
+      printf("%s", "\nPlayer BUSTS ... dealer wins!\n");
+      *player_money -= 5;
+      return 0;
+    }
+
+  }
+
+  return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -212,10 +340,13 @@ int show_player_money_histogram( float money_rounds[], int last_round ) {
 //                argv - the parameters
 // Outputs      : 0 if successful test, -1 if failure
 
-int main( int argc, char **argv ) {
+int main( int argc, char **argv )
+{
 
     /* Local variables */
     int cmp311_deck[NUM_CARDS];  // This is the deck of cards
+    float player_money = 100;
+    int i = 1;
 
     /* Preamble information srand(time(NULL)) ;*/
     printf( "CMPSC311 - Assignment #1 - Fall 2020\n\n" );
@@ -230,6 +361,7 @@ int main( int argc, char **argv ) {
     /* Step #2 - print the deck of cards */
 
     print_cards(cmp311_deck, NUM_CARDS);
+    printf("%s\n", "");
 
     /* Step #4 - shuffle the deck */
 
@@ -238,6 +370,7 @@ int main( int argc, char **argv ) {
     /* Step #5 - print the shuffled deck of cards */
 
     print_cards(cmp311_deck, NUM_CARDS);
+    printf("%s\n", "");
 
     /* Step #6 - sort the cards */
 
@@ -246,8 +379,16 @@ int main( int argc, char **argv ) {
     /* Step #7 - print the sorted deck of cards */
 
     print_cards(cmp311_deck, NUM_CARDS);
+    printf("%s\n", "");
 
-    /* Step #9 - deal the hands */
+    /* Step #9 - deal the hands */////
+
+    while ((i<=5) && (player_money>=5))
+    {
+      play_hand(cmp311_deck, NUM_CARDS, &player_money);
+      printf("%s%d%s%0.2f%s", "\nAfter hand ", i, " player has ", player_money, "$ left\n\n");
+      i++;
+    }
 
     /* Step 10 show historgrapm */
 
