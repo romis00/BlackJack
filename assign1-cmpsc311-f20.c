@@ -6,7 +6,7 @@
 //                   assignment page for details.
 //
 //   Author        : Roman Tuzhilkin
-//   Last Modified : ????
+//   Last Modified : 09.15.2020
 //
 
 // Include Files
@@ -474,7 +474,8 @@ int main( int argc, char **argv )
     float money_rounds[101];                        //Players money per each round
     float player_money = 100;                       //Player money for the current round
     int i = 1;                                      //Idex for the main deck
-    int winning_games = 0;                          //Games that player won
+    double winning_games = 0;                          //Games that player won
+    double winning_percetage = 0;                   //Rate of winning
 
     /* Preamble information srand(time(NULL)) ;*/
     printf( "CMPSC311 - Assignment #1 - Fall 2020\n\n" );
@@ -527,8 +528,9 @@ int main( int argc, char **argv )
       i++;
     }
 
+    winning_percetage = (winning_games/(i-1)*100);
     printf("%s", "-------------\n");
-    printf("%s%d%s%d%s%d%s", "Blackjack done - player won ", winning_games, " out of ", i, " hands (", winning_games, ".00).\n");
+    printf("%s%0.0f%s%d%s%0.2f%s", "Blackjack done - player won ", winning_games, " out of ", i-1, " hands (", winning_percetage, ").\n");
 
     /* Step 10 show historgrapm */
 
